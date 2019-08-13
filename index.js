@@ -12,7 +12,7 @@ function master () {
     let prefix = ".";
 
     bot.commands['!help'] = bot._make_reaction('I\'m kalium\'s master bot!');
-    bot.commands[`!help ${bot._id}`] = bot._make_reaction(`This bot takes commands from @K his account, with the exception of the agreed upon minimum commands. In case of emergency or abuse please !kill this bot to remove all the forks.`);
+    bot.commands[`!help ${bot._id}`] = bot._make_reaction(`This bot takes commands from @K his account, with the exception of the botrules commands. In case of emergency or abuse please !kill this bot to remove all the forks. Ask @K to make a shell for you!`);
 
     attach_listeners_master(bot)
 
@@ -80,6 +80,8 @@ commands:
    start a nix repl.
  - haskell
    start a haskell repl.
+ - ruby
+   start a ruby repl.
  - python
    start a python repl.
  - claim
@@ -129,6 +131,35 @@ feel free to overwrite any of my functionality
                         bot.nick = "bash";
                         bot.reply(`bash started, use \`$\` as a prefix to execute bash statements`);
                         prefix = "$";
+                        shell.stdout.on('data', (data) => {
+                            let output = data.toString().replace(/\[[\d;]+m/g, "");
+                            bot.reply(`${output}`);
+                            console.log(`stdout: ${data}`)
+                        });
+
+                        shell.stderr.on('data', (data) => {
+                            let output = data.toString().replace(/\[[\d;]+m/g, "");
+                            bot.reply(`${output}`);
+                            console.log(`stderr: ${data}`)
+                        });
+
+                        shell.on('exit', _ => {
+                            bot.nick = "node";
+                            shell = false;
+                            prefix = `${bot._id} `;
+                        })
+                        break;
+                    case input.startsWith('ruby'):
+                        if (shell)
+                            break;
+                        shell = spawn("irb",
+                                      {
+                                          stdio: ['pipe', 'pipe', 'pipe']
+                                      })
+
+                        bot.nick = "ruby";
+                        bot.reply(`irb started, use \`>\` as a prefix to execute ruby statements`);
+                        prefix = ">";
                         shell.stdout.on('data', (data) => {
                             let output = data.toString().replace(/\[[\d;]+m/g, "");
                             bot.reply(`${output}`);

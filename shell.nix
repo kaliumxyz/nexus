@@ -32,12 +32,12 @@ in
         serviceConfig = {
           Type = "simple";
           Restart = "always";
-          ExecStart = "${pkgs.nodejs-11_x}/bin/node ${shell}/index.js test";
+          ExecStart = "${pkgs.nodejs-11_x}/bin/node ${shell}/index.js xkcd";
           User = "worker";
           WorkingDirectory = "/home/worker";
         };
         path =
-          with pkgs; [ python37 nodejs-11_x bash nix zsh stack ];
+          with pkgs; [ python37 nodejs-11_x bash nix zsh stack ruby ];
       };
       users.users.root.openssh.authorizedKeys.keys = [
         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCuhdlo0rIskjhJSOC0wAyVgX7CRz0nQx+wuPPCvKcTT75rnUDeFrTPjDo/VP9dBFc/kpQc+CJsDKag1JnR4GLzATyht1+d6BG+TW73FyxFg8ThbEMlGxKK2BvM9W3yUmoESLEoTrhgPgl/PizFW2LuF8SEVUXIoF8xnV51oBhrmaCpleOihL1orVlBTFAMQO9vmuWl/ai/qX1o3aFuC7nPPsyujuZDZ3sOyuWaUFkbjkEDdgURY67E7AuP/nIswQfe+usNPPx3uWZBw9qXPH+tg8MmsFNfmtZUue2oBWrCXcKorWybBt3A9BezSy7Wms6QIrdGJM7oop7yznWwQmwT"
