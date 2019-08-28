@@ -5,8 +5,8 @@ const { spawn, fork } = require('child_process');
 
 const kalium  = 'account:03oav0qe3ah34';
 
-function master () {
-    const bot = new Bot('nexus', process.argv[2]);
+function master (room = process.argv[2]) {
+    const bot = new Bot('nexus', room);
     const children = [];
 
     let prefix = ".";
@@ -15,6 +15,8 @@ function master () {
     bot.commands[`!help ${bot._id}`] = bot._make_reaction(`This bot takes commands from @K his account, with the exception of the botrules commands. In case of emergency or abuse please !kill this bot to remove all the forks. Ask @K to make a shell for you!`);
 
     attach_listeners_master(bot)
+
+    return bot;
 
     function attach_listeners_master (bot) {
         bot.on('ready', () => {
@@ -98,7 +100,7 @@ feel free to overwrite any of my functionality
 
     bot.on('ready', () => {
         process.send({type: "status", data: "ready"});
-        bot.post(`hello! talk to me using \`${prefix}\``);
+        // bot.post(`hello! talk to me using \`${prefix}\``);
         bot.on('post', data => {
             if(data.sender.id === kalium || !lock || data.sender.id === owner) {
                 if (data.bot.parsed.startsWith(prefix)) {

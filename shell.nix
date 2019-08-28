@@ -32,7 +32,7 @@ in
         serviceConfig = {
           Type = "simple";
           Restart = "always";
-          ExecStart = "${pkgs.nodejs-11_x}/bin/node ${shell}/index.js xkcd";
+          ExecStart = "${pkgs.nodejs-11_x}/bin/node ${shell}/index.js blue";
           User = "worker";
           WorkingDirectory = "/home/worker";
         };
