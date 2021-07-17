@@ -1,16 +1,16 @@
 {
   pkgs ? import (fetchTarball {
-    url = https://releases.nixos.org/nixos/19.03/nixos-19.03.172883.1601f559e89/nixexprs.tar.xz;
-    sha256 = "0gvjqr5ra8l1qrgn98cr9y9a5icj0njclw0ks3nd8yg0b4ja2q63";
+    url = https://releases.nixos.org/nixos/21.05/nixos-21.05.1510.a165aeceda9/nixexprs.tar.xz;
+    sha256 = "124s05b0xk97arw0vvq8b4wcvsw6024dfdzwcx9qjxf3a2zszmam";
   }) {}
 }:
   with pkgs;
   stdenv.mkDerivation rec {
     name = "bot-${version}";
-    version = "0.1.0";
+    version = "0.2.0";
     src = ./.;
     phases = [ "unpackPhase" "buildPhase" "installPhase" ];
-    buildInputs = [ nodejs-11_x ];
+    buildInputs = [ nodejs-14_x ];
     buildPhase = ''
       export HOME="."
       npm i
