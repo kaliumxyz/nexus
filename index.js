@@ -13,6 +13,7 @@ function master (room = process.argv[2]) {
 
     bot.commands['!help'] = bot._make_reaction('I\'m kalium\'s master bot!');
     bot.commands[`!help ${bot._id}`] = bot._make_reaction(`This bot takes commands from @K his account, with the exception of the botrules commands. In case of emergency or abuse please !kill this bot to remove all the forks. Ask @K to make a shell for you!`);
+    bot.commands[`!restart ${bot._id}`] = bot._make_reaction(`/me totally for reals restarts`);
 
     attach_listeners_master(bot)
 
