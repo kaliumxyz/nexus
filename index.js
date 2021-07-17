@@ -3,17 +3,16 @@
 const { Bot }         = require('euphoria.js');
 const { spawn, fork } = require('child_process');
 
-const kalium  = 'account:03oav0qe3ah34';
+const k               = 'account:03oav0qe3ah34';
 
 function master (room = process.argv[2]) {
-    const bot = new Bot('nexus', room);
+    const bot      = new Bot('nexus', room);
     const children = [];
 
-    let prefix = ".";
+    let prefix     = ".";
 
-    bot.commands['!help'] = bot._make_reaction('I\'m kalium\'s master bot!');
+    bot.commands['!help'] = bot._make_reaction('This is a bot which runs scripts on demand.');
     bot.commands[`!help ${bot._id}`] = bot._make_reaction(`This bot takes commands from @K his account, with the exception of the botrules commands. In case of emergency or abuse please !kill this bot to remove all the forks. Ask @K to make a shell for you!`);
-    bot.commands[`!restart ${bot._id}`] = bot._make_reaction(`/me totally for reals restarts`);
 
     attach_listeners_master(bot)
 
@@ -22,7 +21,7 @@ function master (room = process.argv[2]) {
     function attach_listeners_master (bot) {
         bot.on('ready', () => {
             bot.on('post', data => {
-                if ( data.sender.id === kalium && data.bot.parsed.startsWith(prefix) ) {
+                if ( data.sender.id === k && data.bot.parsed.startsWith(prefix) ) {
                     const input = data.bot.parsed.slice(prefix.length);
                     switch (true) {
                     case input.startsWith('child'):
@@ -103,7 +102,7 @@ feel free to overwrite any of my functionality
         process.send({type: "status", data: "ready"});
         // bot.post(`hello! talk to me using \`${prefix}\``);
         bot.on('post', data => {
-            if(data.sender.id === kalium || !lock || data.sender.id === owner) {
+            if(data.sender.id === k || !lock || data.sender.id === owner) {
                 if (data.bot.parsed.startsWith(prefix)) {
                     const input = data.bot.parsed.slice(prefix.length).trim();
                     switch (true) {
