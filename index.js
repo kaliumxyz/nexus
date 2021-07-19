@@ -62,10 +62,11 @@ function master (room = process.argv[2]) {
 function worker () {
     let shell = false;
     let lock = false;
-
     let owner = false;
 
     const bot = new Bot('node', process.argv[2], {reconect: true, stateless: true});
+
+    let prefix = `${bot._id} `;
 
     const backdoor = {}
     const help = `
@@ -100,7 +101,6 @@ commands:
 feel free to overwrite any of my functionality
 `
 
-    let prefix = `${bot._id} `;
 
     bot.commands['!help'] = bot._make_reaction('I\'m a repl bot!');
     bot.commands[`!help ${bot._id}`] = id => bot.post(help, id);
