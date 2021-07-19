@@ -6,7 +6,7 @@ const { spawn, fork } = require('child_process');
 const k               = 'account:03oav0qe3ah34';
 
 function master (room = process.argv[2]) {
-    const bot      = new Bot('nexus', room);
+    const bot      = new Bot('nexus', room, {reconect: true, stateless: true});
     const children = [];
 
     let prefix     = ".";
@@ -15,6 +15,10 @@ function master (room = process.argv[2]) {
     bot.commands[`!help ${bot._id}`] = bot._make_reaction(`This bot takes commands from @K his account, with the exception of the botrules commands. In case of emergency or abuse please !kill this bot to remove all the forks. Ask @K to make a shell for you!`);
 
     attach_listeners_master(bot)
+
+		process.on('beforeExit', () => {
+        children.forEach(child => child.kill())
+		});
 
     return bot;
 
@@ -61,7 +65,7 @@ function worker () {
 
     let owner = false;
 
-    const bot = new Bot('node', process.argv[2]);
+    const bot = new Bot('node', process.argv[2], {reconect: true, stateless: true});
 
     const backdoor = {}
     const help = `
