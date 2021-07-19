@@ -64,14 +64,12 @@ function worker () {
     const bot = new Bot('node', process.argv[2]);
 
     const backdoor = {}
-
-    let prefix = `${bot._id} `;
-
-    bot.commands['!help'] = bot._make_reaction('I\'m a repl bot!');
-    bot.commands[`!help ${bot._id}`] = id => bot.post(`
+    const help = `
 my capabilities depend on my mode:
 prefix:  \`${prefix}\`
 commands:
+ - help
+   print this help.
  - bash
    start a bash shell.
  - sh
@@ -96,7 +94,12 @@ commands:
    quit any shell
 
 feel free to overwrite any of my functionality
-`, id);
+`
+
+    let prefix = `${bot._id} `;
+
+    bot.commands['!help'] = bot._make_reaction('I\'m a repl bot!');
+    bot.commands[`!help ${bot._id}`] = id => bot.post(help, id);
 
     bot.on('ready', () => {
         process.send({type: "status", data: "ready"});
@@ -106,6 +109,9 @@ feel free to overwrite any of my functionality
                 if (data.bot.parsed.startsWith(prefix)) {
                     const input = data.bot.parsed.slice(prefix.length).trim();
                     switch (true) {
+                    case input.startsWith('help'):
+                        bot.reply(help);
+                        break;
                     case input.startsWith('unlock'):
                         lock = false;
                         bot.reply(`bot unlocked!`);
