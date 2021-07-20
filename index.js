@@ -16,7 +16,7 @@ function master (room = process.argv[2]) {
 
     attach_listeners_master(bot)
 
-		process.on('beforeExit', () => {
+		process.once('exit', () => {
         children.forEach(child => child.kill())
 		});
 
