@@ -5,6 +5,21 @@ const { spawn, fork } = require('child_process');
 
 const k               = 'account:03oav0qe3ah34';
 
+// TODO:
+// mode specific help (cant switch mode while in a mode)
+// clearer documentation
+// prefix in help msg inaccurate
+// sometimes doesn't reply at all, is confusing, something about the regex filter agaist it spamming to much, sumairu said add \e
+// individual addressing of instances
+// I can create children for non-existing rooms
+// add capabilities to control lcok and control children from nexus in a way that can't easily be screwed with
+// issues with euphoria.js:
+//   invalid name changes possible,
+//   memory leak issue, see dump file
+//   new version of node breaking the unit tests. We should figure out how to fix this
+//   cant return bot ID raw
+//   happy will let a bot connect to a non-existing room???
+
 function master (room = process.argv[2]) {
     const bot      = new Bot('nexus', room, {reconect: true, stateless: true});
     const children = [];
