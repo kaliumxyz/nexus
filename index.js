@@ -9,6 +9,7 @@ const k               = 'account:03oav0qe3ah34';
 // mode specific help (cant switch mode while in a mode)
 // clearer documentation
 // prefix in help msg inaccurate
+// remove prefix change system
 // sometimes doesn't reply at all, is confusing, something about the regex filter agaist it spamming to much, sumairu said add \e
 // individual addressing of instances
 // I can create children for non-existing rooms
