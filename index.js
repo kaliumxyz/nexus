@@ -13,6 +13,7 @@ const k               = 'account:03oav0qe3ah34';
 // childid not reported when .child
 // add capabilities to control lcok and control children from nexus in a way that can't easily be screwed with
 // issues with euphoria.js:
+// add send raw to allow ID sending without changing it to nick
 // wont fix
 //   invalid name changes possible, ????
 //   happy will let a bot connect to a non-existing room???
@@ -24,7 +25,7 @@ function master (room = process.argv[2]) {
     let prefix     = ".";
 
     bot.commands['!help'] = bot._make_reaction('This is a bot which runs scripts on demand.');
-    bot.commands[`!help ${bot._id}`] = bot._make_reaction(`In case of emergency or abuse please !kill this bot to remove all existing shell bots (node, bash, etc). This is the manager instance of the shell bots and can only be controlled by @K his account. Ask @K to make a shell for you!`);
+    bot.commands[`!help ${bot.self}`] = bot._make_reaction(`In case of emergency or abuse please !kill this bot to remove all existing shell bots (node, bash, etc). This is the manager instance of the shell bots and can only be controlled by @K his account. Ask @K to make a shell for you!`);
 
     attach_listeners_master(bot)
 
@@ -35,32 +36,41 @@ function master (room = process.argv[2]) {
     return bot;
 
     function attach_listeners_master (bot) {
+        // TODO: child should be an object with meta information such as status, room, nick, etc
         bot.on('ready', () => {
             bot.on('post', data => {
                 if ( data.sender.id === k && data.bot.parsed.startsWith(prefix) ) {
                     const input = data.bot.parsed.slice(prefix.length);
                     switch (true) {
                     case input === 'children':
-                        bot.reply(JSON.stringify(children))
+                        bot.post(JSON.stringify(children), data.id)
                         break;
                     // case input === 'children':
-                    //     bot.reply(JSON.stringify(children))
+                    //     bot.post(JSON.stringify(children))
                     //     break;
                     case input === 'c':
                         const ch = fork(process.argv[1], ["test"],
                                            {
                                                stdio: ['inherit', 'inherit', 'inherit', 'ipc']
                                            });
+                        const cid = children.length;
                         ch.on("message", (x) => {
                             console.log(x);
                             switch (x.type) {
                             case "ready":
-                                bot.reply(`child ${children.length} ${ch._id} created`);
+                                bot.post(`child ${cid} ${x.data.id} initialized in ${x.data.room}`, data.id);
                                 break;
                             }
                         });
                         children.push(ch);
-                        bot.reply(`child ${children.length -1} created`);
+                        bot.post(`child ${cid} created`, data.id);
+                        break;
+                    case input.startsWith('kill'):
+                        if (!input.match(/\d+/))
+                            break;
+                        const victim = children[input.match(/(\d+)/)[1]]
+                        if (victim)
+                            victim.kill();
                         break;
                     case input.startsWith('child'):
                         if (!input.match(/&\w+/))
@@ -73,14 +83,14 @@ function master (room = process.argv[2]) {
                             console.log(x);
                         });
                         children.push(child);
-                        bot.reply(`child ${child._id} created`);
+                        bot.post(`child ${child._id} created`, data.id);
                         break;
                     default:
                         console.log(`${data.sender.name}: ${input}`)
                         try {
-                            bot.reply(`${eval(input)}`);
+                            bot.post(`${eval(input)}`, data.id);
                         } catch (e) {
-                            bot.reply(`${e}`);
+                            bot.post(`${e}`, data.id);
                         }
                         break;
                     }
@@ -97,15 +107,15 @@ function worker () {
 
     const bot = new Bot('node', process.argv[2], {reconect: true, stateless: true});
 
-    let prefix = `${bot._id} `;
+    let prefix = `${bot.self} `;
     let nick   = 'node';
 
     bot.commands['!help'] = bot._make_reaction('I\'m a repl bot!');
-    bot.commands[`!help ${bot._id}`] = id => bot.post(`
+    bot.commands[`!help ${bot.self}`] = id => bot.post(`
 my capabilities depend on my mode:
 default nick :  \`${nick}\`
 prefix :  \`${prefix}\`
-UUID :  \`${bot._id.replace('-','‒')}\`
+UUID :  \`${bot.self.replace('-','‒')}\`
 
 default mode (node) commands:
  - bash
@@ -115,7 +125,7 @@ default mode (node) commands:
  - nix
    start a nix repl.
  - gforth
-   start a gforth repl.
+   start a gforth process.
  - haskell
    start a haskell repl.
  - ruby
@@ -141,9 +151,10 @@ feel free to overwrite any of my functionality.
 `, id);
 
     bot.on('ready', () => {
-        process.send({type: "ready", data: {id: bot._id, room: bot.room}});
+        process.send({type: "ready", data: {id: bot.self, room: bot.room}});
         // bot.post(`hello! talk to me using \`${prefix}\``);
         bot.on('post', data => {
+            // console.log(data)
             if(data.sender.id === k || !lock || data.sender.id === owner) {
                 if (data.bot.parsed.startsWith(prefix)) {
                     const input = data.bot.parsed.slice(prefix.length).trim();
@@ -190,7 +201,7 @@ feel free to overwrite any of my functionality.
                         shell.on('exit', _ => {
                             bot.nick = "node";
                             shell = false;
-                            prefix = `${bot._id} `;
+                            prefix = `${bot.self} `;
                         })
                         break;
                     case input.startsWith('ruby'):
@@ -218,7 +229,7 @@ feel free to overwrite any of my functionality.
                         shell.on('exit', _ => {
                             bot.nick = "node";
                             shell = false;
-                            prefix = `${bot._id} `;
+                            prefix = `${bot.self} `;
                         })
                         break;
                     case input.startsWith('sh'):
@@ -246,7 +257,7 @@ feel free to overwrite any of my functionality.
                         shell.on('exit', _ => {
                             bot.nick = "node";
                             shell = false;
-                            prefix = `${bot._id} `;
+                            prefix = `${bot.self} `;
                         })
                         break;
                     case input.startsWith('python'):
@@ -274,7 +285,7 @@ feel free to overwrite any of my functionality.
                         shell.on('exit', _ => {
                             bot.nick = "node";
                             shell = false;
-                            prefix = `${bot._id} `;
+                            prefix = `${bot.self} `;
                         })
                         break;
                     case input.startsWith('haskell'):
@@ -303,7 +314,7 @@ feel free to overwrite any of my functionality.
                         shell.on('exit', _ => {
                             bot.nick = "node";
                             shell = false;
-                            prefix = `${bot._id} `;
+                            prefix = `${bot.self} `;
                         })
                         break;
                     case input.startsWith('nix'):
@@ -316,6 +327,34 @@ feel free to overwrite any of my functionality.
 
                         bot.nick = `${nick}::nix`;
                         bot.reply(`nix repl started, use \`${prefix}\` as a prefix to execute nix statements. Exit using \`exit\`.`);
+
+                        shell.stdout.on('data', (data) => {
+                            let output = data.toString().replace(/\[[\d;]+m/g, "");
+                            bot.reply(`${output}`);
+                            console.log(`stdout: ${data}`)
+                        });
+
+                        shell.stderr.on('data', (data) => {
+                            let output = data.toString().replace(/\[[\d;]+m/g, "");
+                            bot.reply(`${output}`);
+                            console.log(`stderr: ${data}`)
+                        });
+
+                        shell.on('exit', _ => {
+                            bot.nick = `${nick}`;
+                            shell = false;
+                        })
+                        break;
+                    case input.startsWith('gforth'):
+                        if (shell)
+                            break;
+                        shell = spawn("gforth", [],
+                                      {
+                                          stdio: ['pipe', 'pipe', 'pipe']
+                                      })
+
+                        bot.nick = `${nick}::gforth`;
+                        bot.reply(`gforth repl started, use \`${prefix}\` as a prefix to execute gforth statements. Exit using \`exit\`.`);
 
                         shell.stdout.on('data', (data) => {
                             let output = data.toString().replace(/\[[\d;]+m/g, "");
